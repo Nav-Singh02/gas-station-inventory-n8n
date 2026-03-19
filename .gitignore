@@ -1,0 +1,5 @@
+.env
+.mcp.json
+.DS_Store
+n8n-skills/
+gas-station-inventory-analysis-v1-backup.json

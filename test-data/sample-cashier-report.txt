@@ -1,0 +1,32 @@
+DAILY CASHIER REPORT
+
+Gas Station - Register #1
+Date: February 15, 2026
+Shift: Full Day (6:00 AM - 10:00 PM)
+Cashier: Maria Johnson
+
+--------------------------------------------------------------
+Item                    Qty Sold    Unit Price      Total
+--------------------------------------------------------------
+Marlboro Red Kings      12          $8.99           $107.88
+Camel Blue              7           $8.49           $59.43
+Coca-Cola 20oz          35          $2.49           $87.15
+Pepsi 20oz              28          $2.49           $69.72
+Red Bull 8.4oz          18          $3.99           $71.82
+Monster Energy 16oz     14          $3.49           $48.86
+Doritos Nacho Cheese    9           $3.29           $29.61
+Lay's Classic Chips     8           $3.29           $26.32
+Snickers Bar            15          $1.99           $29.85
+5-Hour Energy           11          $3.49           $38.39
+Bud Light 6-pack        6           $9.99           $59.94
+Jack Links Beef Jerky   4           $6.99           $27.96
+--------------------------------------------------------------
+                                TOTAL SALES:        $656.93
+
+Cash:           $412.50
+Credit/Debit:   $244.43
+--------------------------------------------------------------
+Register Balance: $656.93
+Variance: $0.00
+
+Notes: Busy morning rush. Red Bull and cigarettes top sellers as usual.

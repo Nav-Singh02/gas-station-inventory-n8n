@@ -1,0 +1,35 @@
+INVOICE
+
+ABC Distributors Inc.
+123 Supply Chain Blvd
+Houston, TX 77001
+
+Invoice #: INV-2026-0215
+Date: February 15, 2026
+
+Bill To:
+Gas Station
+456 Main Street
+
+--------------------------------------------------------------
+Item                    Qty     Unit Cost       Total
+--------------------------------------------------------------
+Marlboro Red Kings      50      $6.25           $312.50
+Camel Blue              30      $5.80           $174.00
+Coca-Cola 20oz          120     $1.15           $138.00
+Pepsi 20oz              96      $1.10           $105.60
+Red Bull 8.4oz          72      $2.05           $147.60
+Monster Energy 16oz     48      $2.15           $103.20
+Doritos Nacho Cheese    36      $1.85           $66.60
+Lay's Classic Chips     36      $1.85           $66.60
+Snickers Bar            60      $0.95           $57.00
+5-Hour Energy           40      $1.75           $70.00
+Bud Light 6-pack        24      $5.50           $132.00
+Jack Links Beef Jerky   20      $3.25           $65.00
+--------------------------------------------------------------
+                                SUBTOTAL:       $1,438.10
+                                TAX (0%):       $0.00
+                                TOTAL:          $1,438.10
+
+Payment Terms: Net 30
+Thank you for your business!

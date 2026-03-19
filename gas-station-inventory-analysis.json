@@ -1,0 +1,2708 @@
+{
+  "updatedAt": "2026-02-25T22:57:07.243Z",
+  "createdAt": "2026-02-08T18:23:41.897Z",
+  "id": "3cRQVn046MAGBszj",
+  "name": "Gas Station Monthly Inventory Analysis",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "subject:invoice OR subject:\"cashier report\" OR subject:\"monthly analysis\"",
+          "readStatus": "unread"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "12a34b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c",
+      "name": "Gmail Email Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        688
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c1qMB82DsFSyyQXc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this gas station inventory data for {{ $json.analysisMonth }} and return ONLY a valid JSON object, no other text.\n\nSUPPLY DATA:\n{{ $json.supplyData }}\n\nSALES DATA:\n{{ $json.salesData }}\n\nFor each item, match supply items to sales items by name and calculate metrics. Use the calculator tool for precise math.\n\nReturn ONLY this JSON structure:\n{\"analysisMonth\":\"{{ $json.analysisMonth }}\",\"totalSupplyCost\":{{ $json.totalSupplyCost }},\"totalRevenue\":{{ $json.totalRevenue }},\"grossProfit\":0,\"profitMarginPct\":0,\"itemBreakdown\":[{\"name\":\"\",\"qtySupplied\":0,\"qtySold\":0,\"sellThroughPct\":0,\"revenue\":0,\"cost\":0,\"profit\":0}]}\n\nRules:\n- grossProfit = totalRevenue - totalSupplyCost\n- profitMarginPct = (grossProfit / totalRevenue * 100) rounded to 1 decimal\n- sellThroughPct = (qtySold / qtySupplied * 100) rounded to 1 decimal\n- Include every item from supply data in itemBreakdown\n- Return ONLY the JSON object, no explanation, no markdown",
+        "hasOutputParser": false,
+        "options": {
+          "maxIterations": 5,
+          "systemMessage": "You are a Senior Financial Analyst specializing in gas station inventory management. Always be specific and quantitative in your analysis. Even with limited data, identify the most important patterns and provide actionable insights. Always populate reorderRecommendations and alerts with concrete findings."
+        }
+      },
+      "id": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+      "name": "Financial Analyst Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        480,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
+      "name": "Analyst LLM",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        1408
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OD2MSrjB2D6fNI12",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a professional, visually appealing HTML report for a gas station inventory analysis.\n\nStation: {{ $json.stationName }}\nMonth: {{ $json.analysisMonth }}\nData Sources: {{ $json.invoiceCount }} invoices, {{ $json.salesReportCount }} sales reports\nTotal Supply Cost: ${{ $json.totalSupplyCost }}\nTotal Revenue: ${{ $json.totalRevenue }}\n\nANALYSIS DATA:\n{{ $json.analysisResults }}\n\nCreate HTML with:\n- Inline CSS styling (no external stylesheets)\n- Professional typography (Arial, sans-serif)\n- A header banner with station name and month\n- Summary cards for key metrics (revenue, profit, margin) with colored backgrounds\n- Data tables with borders, padding, and alternating row colors\n- Color coding: green for positive metrics, red for negative, yellow for warnings\n- Dead stock items highlighted in red\n- Top sellers highlighted in green\n- A recommendations section\n- Footer with generation timestamp\n\nReturn ONLY the complete HTML document, starting with <!DOCTYPE html>.",
+        "options": {
+          "systemMessage": "You are an expert business report designer specializing in creating professional, visually appealing HTML reports with inline CSS. Your reports should look like they were designed by a professional graphic designer. Always return complete, valid HTML documents.",
+          "maxIterations": 5
+        }
+      },
+      "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
+      "name": "Report Writer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1408,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "id": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+      "name": "Report Writer LLM",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        1408
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OD2MSrjB2D6fNI12",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+        "subject": "=Monthly Inventory Analysis - {{ $('Prepare PDF Report Input').item.json.analysisMonth }}",
+        "emailType": "html",
+        "message": "={{ $('Report Writer Agent').item.json.output || $('Report Writer Agent').item.json.text || '' }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f8a9b0c1-d2e3-4f4a-5b6c-7d8e9f0a1b2c",
+      "name": "Send Monthly Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1808,
+        1200
+      ],
+      "webhookId": "904bb507-a68b-4ad3-a10f-eaed24460ba9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c1qMB82DsFSyyQXc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": false,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "a1b2c3d4-1111-4aaa-bbbb-ccccddddeeee",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "leftValue": "={{ $json.subject }}",
+                    "rightValue": "invoice"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Invoice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": false,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "a1b2c3d4-2222-4aaa-bbbb-ccccddddeeee",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "leftValue": "={{ $json.subject }}",
+                    "rightValue": "cashier report"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Cashier Report"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": false,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "a1b2c3d4-3333-4aaa-bbbb-ccccddddeeee",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "leftValue": "={{ $json.subject }}",
+                    "rightValue": "monthly analysis"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Monthly Analysis"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "2a9d32c5-66a2-4d6d-a3b9-7de8d5887f65",
+      "name": "Route Email",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        112,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+        "subject": "Email Subject Not Recognized - Gas Station System",
+        "emailType": "text",
+        "message": "=Your email could not be processed because the subject line did not match any expected patterns.\n\nYour subject: {{ $json.subject }}\n\nPlease use one of these subject formats:\n- Invoice - [Vendor] - [Date]\n- Cashier Report - [Date]\n- Monthly Analysis - [Month] [Year]",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "fdf410fb-df54-478c-bd22-02ef23a60ae0",
+      "name": "Send Unrecognized Email Error",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        1408
+      ],
+      "webhookId": "45109524-759f-4efc-af45-03b7ffa31f3a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c1qMB82DsFSyyQXc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "attachment_0",
+        "options": {}
+      },
+      "id": "d1a2b3c4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "name": "Extract Invoice OCR",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.text || '';\n\nconst wordCount = text.split(/\\s+/).filter(w => w.length > 0).length;\nconst hasNumbers = /\\d/.test(text);\nconst hasLetters = /[a-zA-Z]/.test(text);\nconst specialCharCount = (text.match(/[^a-zA-Z0-9\\s.,;:$#@!?()\\-\\/]/g) || []).length;\nconst specialCharRatio = text.length > 0 ? specialCharCount / text.length : 0;\n\nlet quality = 'high';\nlet errors = [];\n\nif (wordCount < 10) {\n  quality = 'low';\n  errors.push('Too few words extracted (possible scan quality issue)');\n}\n\nif (!hasNumbers || !hasLetters) {\n  quality = 'low';\n  errors.push('Missing expected content (numbers or letters)');\n}\n\nif (specialCharRatio > 0.3) {\n  quality = 'low';\n  errors.push('High special character ratio (OCR artifacts)');\n}\n\nif (quality !== 'low' && !text.toLowerCase().includes('invoice') && !text.toLowerCase().includes('total') && !text.toLowerCase().includes('amount')) {\n  quality = 'medium';\n  errors.push('Expected invoice keywords missing - may not be an invoice document');\n}\n\nreturn [{\n  json: {\n    data: text,\n    ocr_quality: quality,\n    ocr_errors: errors,\n    is_valid: quality !== 'low',\n    word_count: wordCount\n  }\n}];"
+      },
+      "id": "e2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b",
+      "name": "Detect OCR Errors",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.is_valid }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f3a4b5c6-d7e8-4f9a-0b1c-2d3e4f5a6b7c",
+      "name": "IF - Valid OCR?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract structured invoice data from this OCR text and return ONLY a valid JSON object with no other text.\n\nTEXT:\n{{ $json.data }}\n\nReturn this exact JSON structure:\n{\"vendor\": \"company name\", \"invoice_date\": \"YYYY-MM-DD\", \"month\": \"YYYY-MM\", \"items\": [{\"name\": \"item name\", \"qty\": 0, \"unit_cost\": 0, \"total_cost\": 0}], \"total_cost\": 0}\n\nRules:\n- vendor: the company/vendor name on the invoice\n- invoice_date: date in YYYY-MM-DD format\n- month: YYYY-MM format extracted from invoice_date\n- items: every line item with numeric qty and costs\n- total_cost: total invoice amount as a number\n- Return ONLY the JSON object, no explanation, no markdown",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "You are an expert at extracting structured invoice data from OCR text, including imperfect scans of printed and handwritten invoices. Always return valid JSON.",
+          "maxIterations": 10
+        }
+      },
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-111111111111",
+      "name": "Parse Invoice",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        864,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "b2c3d4e5-f6a7-4b8c-9d0e-222222222222",
+      "name": "Invoice Parser LLM",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OD2MSrjB2D6fNI12",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "autoFix": true
+      },
+      "id": "c3d4e5f6-a7b8-4c9d-0e1f-333333333333",
+      "name": "Invoice Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {}
+      },
+      "id": "d4e5f6a7-b8c9-4d0e-1f2a-444444444444",
+      "name": "Invoice Parser LLM2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        496
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OD2MSrjB2D6fNI12",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Invoices"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e5f6a7b8-c9d0-4e1f-2a3b-555555555555",
+      "name": "Store Invoice to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1360,
+        224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lKrtgm7vYFwO4YeG",
+          "name": "My Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+        "subject": "=Invoice Processed Successfully",
+        "emailType": "text",
+        "message": "=Your invoice has been processed and stored successfully.\n\nVendor: {{ $('Extract Invoice Data').item.json.vendor }}\nMonth: {{ $('Extract Invoice Data').item.json.month }}\nTotal: ${{ $('Extract Invoice Data').item.json.total_cost }}\nOCR Quality: {{ $('Detect OCR Errors').item.json.ocr_quality }}\n\nThis data will be included in your monthly analysis report.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f6a7b8c9-d0e1-4f2a-3b4c-666666666666",
+      "name": "Send Confirmation Email (Invoice)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        224
+      ],
+      "webhookId": "a3fbb0a7-39d6-4934-953b-4885f82e30ea",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c1qMB82DsFSyyQXc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+        "subject": "=Invoice Processing Error - OCR Quality Issue",
+        "emailType": "text",
+        "message": "=Your invoice could not be processed due to OCR quality issues.\n\nIssues: {{ $json.ocr_errors }}\nWords extracted: {{ $json.word_count }}\n\nPlease resend with a clearer scan.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a7b8c9d0-e1f2-4a3b-4c5d-777777777777",
+      "name": "Send Error Alert (Invoice)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        544
+      ],
+      "webhookId": "550bf1a5-82c1-4c12-b0f0-4339e389159d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c1qMB82DsFSyyQXc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "attachment_0",
+        "options": {}
+      },
+      "id": "50a10726-438a-4ccc-b659-dd51dde0c346",
+      "name": "Extract Sales OCR",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.text || '';\n\nconst wordCount = text.split(/\\s+/).filter(w => w.length > 0).length;\nconst hasNumbers = /\\d/.test(text);\nconst hasLetters = /[a-zA-Z]/.test(text);\nconst specialCharCount = (text.match(/[^a-zA-Z0-9\\s.,;:$#@!?()\\-\\/]/g) || []).length;\nconst specialCharRatio = text.length > 0 ? specialCharCount / text.length : 0;\n\nlet quality = 'high';\nlet errors = [];\n\nif (wordCount < 10) {\n  quality = 'low';\n  errors.push('Too few words extracted (possible scan quality issue)');\n}\n\nif (!hasNumbers || !hasLetters) {\n  quality = 'low';\n  errors.push('Missing expected content (numbers or letters)');\n}\n\nif (specialCharRatio > 0.3) {\n  quality = 'low';\n  errors.push('High special character ratio (OCR artifacts)');\n}\n\nif (quality !== 'low' && !text.toLowerCase().includes('sales') && !text.toLowerCase().includes('revenue') && !text.toLowerCase().includes('register') && !text.toLowerCase().includes('total')) {\n  quality = 'medium';\n  errors.push('Expected sales report keywords missing');\n}\n\nreturn [{\n  json: {\n    data: text,\n    ocr_quality: quality,\n    ocr_errors: errors,\n    is_valid: quality !== 'low',\n    word_count: wordCount\n  }\n}];"
+      },
+      "id": "7c5e9d32-066d-477b-90e9-da9693926a55",
+      "name": "Detect OCR Errors (Sales)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "b1b2c3d4-4444-4aaa-bbbb-ccccddddeeee",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.is_valid }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a051cce9-7db4-46c7-a149-e9ef50a64395",
+      "name": "IF - Valid OCR? (Sales)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract structured sales data from this cashier report OCR text and return ONLY a valid JSON object with no other text.\n\nTEXT:\n{{ $json.data }}\n\nReturn this exact JSON structure:\n{\"report_date\": \"YYYY-MM-DD\", \"month\": \"YYYY-MM\", \"items\": [{\"name\": \"item name\", \"qty\": 0, \"unit_price\": 0, \"total_revenue\": 0}], \"total_revenue\": 0}\n\nRules:\n- report_date: date of the report in YYYY-MM-DD format\n- month: YYYY-MM format extracted from report_date\n- items: every line item sold with numeric qty and prices\n- total_revenue: total sales amount as a number\n- Return ONLY the JSON object, no explanation, no markdown",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "You are an expert at extracting structured sales data from cash register reports, including imperfect OCR text from printed and handwritten documents. Always return valid JSON.",
+          "maxIterations": 10
+        }
+      },
+      "id": "08d7f8b1-0fea-41a1-963c-8d372ff70b11",
+      "name": "Parse Sales Report",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1008,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "9614733a-8a82-4ee5-811e-803589fe7d4a",
+      "name": "Sales Parser LLM",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        912
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OD2MSrjB2D6fNI12",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "autoFix": true
+      },
+      "id": "549af240-39d8-4b1c-8223-ec08f9203dfc",
+      "name": "Sales Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {}
+      },
+      "id": "c32461e8-c2f1-4981-9fd9-5671fce60b48",
+      "name": "Sales Parser LLM2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        1040
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "OD2MSrjB2D6fNI12",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sales"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cd2ca54e-2ea5-4bbf-8003-8d1e7a99a6a2",
+      "name": "Store Sales to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        704
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lKrtgm7vYFwO4YeG",
+          "name": "My Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+        "subject": "=Sales Report Processed Successfully",
+        "emailType": "text",
+        "message": "=Your cashier report has been processed and stored successfully.\n\nDate: {{ $('Extract Sales Data').item.json.report_date }}\nMonth: {{ $('Extract Sales Data').item.json.month }}\nTotal Revenue: ${{ $('Extract Sales Data').item.json.total_revenue }}\nOCR Quality: {{ $('Detect OCR Errors (Sales)').item.json.ocr_quality }}\n\nThis data will be included in your monthly analysis report.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "9710de36-3c9c-48c4-83ae-93cd92f6ba2a",
+      "name": "Send Confirmation Email (Sales)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1408,
+        704
+      ],
+      "webhookId": "6e858af7-8328-4147-90be-32ca261be525",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c1qMB82DsFSyyQXc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+        "subject": "=Sales Report Processing Error - OCR Quality Issue",
+        "emailType": "text",
+        "message": "=Your cashier report could not be processed due to OCR quality issues.\n\nIssues detected: {{ $json.ocr_errors }}\nWords extracted: {{ $json.word_count }}\n\nPlease resend with a clearer scan or photo.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "51fc9650-7955-4d71-b480-b642ab4c44b3",
+      "name": "Send Error Alert (Sales)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1008,
+        1104
+      ],
+      "webhookId": "66216729-b68b-4c1a-9816-407fabad73ad",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c1qMB82DsFSyyQXc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const subject = $input.first().json.subject || '';\n\nconst monthNames = ['january', 'february', 'march', 'april', 'may', 'june',\n                    'july', 'august', 'september', 'october', 'november', 'december'];\n\nlet month = null;\nlet year = new Date().getFullYear();\n\nconst yearMatch = subject.match(/\\b(20\\d{2})\\b/);\nif (yearMatch) year = parseInt(yearMatch[1]);\n\nconst subjectLower = subject.toLowerCase();\nfor (let i = 0; i < monthNames.length; i++) {\n  if (subjectLower.includes(monthNames[i])) {\n    month = String(i + 1).padStart(2, '0');\n    break;\n  }\n}\n\nif (!month) {\n  const lastMonth = new Date();\n  lastMonth.setMonth(lastMonth.getMonth() - 1);\n  month = String(lastMonth.getMonth() + 1).padStart(2, '0');\n  year = lastMonth.getFullYear();\n}\n\nconst analysisMonth = `${year}-${month}`;\n\nreturn [{\n  json: {\n    analysisMonth,\n    requestedBy: $input.first().json.from.value[0].address\n  }\n}];"
+      },
+      "id": "4f2e3f65-fb70-452d-9eab-c97d69b5e179",
+      "name": "Extract Month from Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Invoices"
+        },
+        "options": {}
+      },
+      "id": "34ceac12-51ad-4732-ad45-c70e8acede38",
+      "name": "Read Invoices from Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        608,
+        1200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lKrtgm7vYFwO4YeG",
+          "name": "My Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sales"
+        },
+        "options": {}
+      },
+      "id": "b7158276-8944-4fe3-b591-d542fe582688",
+      "name": "Read Sales from Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        1200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lKrtgm7vYFwO4YeG",
+          "name": "My Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const invoices = $('Read Invoices from Sheets').all();\nconst sales = $('Read Sales from Sheets').all();\nconst month = $('Extract Month from Email').item.json.analysisMonth;\n\nlet totalSupplyCost = 0;\nconst allSupplyItems = [];\n\ninvoices.forEach(inv => {\n  if (inv.json.month === month) {\n    totalSupplyCost += parseFloat(inv.json.total_cost || 0);\n    try {\n      const items = JSON.parse(inv.json.items || '[]');\n      allSupplyItems.push(...items);\n    } catch(e) {}\n  }\n});\n\nlet totalRevenue = 0;\nconst allSalesItems = [];\n\nsales.forEach(sale => {\n  if (sale.json.month === month) {\n    totalRevenue += parseFloat(sale.json.total_revenue || 0);\n    try {\n      const items = JSON.parse(sale.json.items || '[]');\n      allSalesItems.push(...items);\n    } catch(e) {}\n  }\n});\n\nconst supplyMap = {};\nallSupplyItems.forEach(item => {\n  const key = (item.name || '').toLowerCase().trim();\n  if (!key) return;\n  if (!supplyMap[key]) supplyMap[key] = {name: item.name, qty: 0, totalCost: 0};\n  supplyMap[key].qty += (item.qty || 0);\n  supplyMap[key].totalCost += (item.total_cost || 0);\n});\n\nconst salesMap = {};\nallSalesItems.forEach(item => {\n  const key = (item.name || '').toLowerCase().trim();\n  if (!key) return;\n  if (!salesMap[key]) salesMap[key] = {name: item.name, qty: 0, totalRevenue: 0};\n  salesMap[key].qty += (item.qty || 0);\n  salesMap[key].totalRevenue += (item.total_revenue || 0);\n});\n\nreturn [{\n  json: {\n    analysisMonth: month,\n    invoiceCount: invoices.filter(i => i.json.month === month).length,\n    salesReportCount: sales.filter(s => s.json.month === month).length,\n    supplyData: JSON.stringify(Object.values(supplyMap)),\n    salesData: JSON.stringify(Object.values(salesMap)),\n    totalSupplyCost,\n    totalRevenue\n  }\n}];"
+      },
+      "id": "d24b428f-2375-453f-be42-61f9dd54f77e",
+      "name": "Aggregate Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const analysis = $input.first().json;\nconst aggData = $('Aggregate Data').item.json;\n\nconst month = analysis.analysisMonth || aggData.analysisMonth;\nconst [year, monthNum] = month.split('-');\nconst monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst displayMonth = `${monthNames[parseInt(monthNum)-1]} ${year}`;\n\n// Parse JSON strings back to arrays for the Report Writer\nconst itemBreakdown = JSON.parse(analysis.itemBreakdown || '[]');\nconst topSellers = JSON.parse(analysis.topSellers || '[]');\nconst fastMovers = JSON.parse(analysis.fastMovers || '[]');\nconst deadStock = JSON.parse(analysis.deadStock || '[]');\nconst reorderRecommendations = JSON.parse(analysis.reorderRecommendations || '[]');\nconst alerts = JSON.parse(analysis.alerts || '[]');\n\nreturn [{\n  json: {\n    stationName: 'Gas Station',\n    analysisMonth: displayMonth,\n    invoiceCount: aggData.invoiceCount,\n    salesReportCount: aggData.salesReportCount,\n    totalSupplyCost: analysis.totalSupplyCost,\n    totalRevenue: analysis.totalRevenue,\n    grossProfit: analysis.grossProfit,\n    profitMarginPct: analysis.profitMarginPct,\n    itemBreakdown: itemBreakdown,\n    topSellers: topSellers,\n    fastMovers: fastMovers,\n    deadStock: deadStock,\n    reorderRecommendations: reorderRecommendations,\n    alerts: alerts\n  }\n}];"
+      },
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-aabbccddeeff",
+      "name": "Prepare PDF Report Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Monthly_Analysis"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-f6a7-4b8c-9d0e-ffeeddccbbaa",
+      "name": "Store Analysis to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1600,
+        1200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lKrtgm7vYFwO4YeG",
+          "name": "My Google Sheets"
+        }
+      }
+    },
+    {
+      "id": "aa11bb22-cc33-4d44-ee55-ff6677889900",
+      "name": "Extract Invoice Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const text = $input.first().json.output || '';\ntry {\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    const parsed = JSON.parse(jsonMatch[0]);\n    return [{\n      json: {\n        vendor: parsed.vendor || '',\n        invoice_date: parsed.invoice_date || '',\n        month: parsed.month || '',\n        items: JSON.stringify(parsed.items || []),\n        total_cost: parsed.total_cost || 0\n      }\n    }];\n  }\n} catch(e) {}\nreturn [{ json: { error: 'Could not parse invoice JSON', raw: text.substring(0, 500) } }];"
+      }
+    },
+    {
+      "id": "bb22cc33-dd44-4e55-ff66-aa7788990011",
+      "name": "Extract Sales Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        700
+      ],
+      "parameters": {
+        "jsCode": "const text = $input.first().json.output || '';\ntry {\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    const parsed = JSON.parse(jsonMatch[0]);\n    return [{\n      json: {\n        report_date: parsed.report_date || '',\n        month: parsed.month || '',\n        items: JSON.stringify(parsed.items || []),\n        total_revenue: parsed.total_revenue || 0\n      }\n    }];\n  }\n} catch(e) {}\nreturn [{ json: { error: 'Could not parse sales JSON', raw: text.substring(0, 500) } }];"
+      }
+    },
+    {
+      "id": "cc33dd44-ee55-4f66-aa77-bb8899001122",
+      "name": "Extract Analysis Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        1200
+      ],
+      "parameters": {
+        "jsCode": "const text = $input.first().json.output || '';\nlet parsed;\ntry {\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    parsed = JSON.parse(jsonMatch[0]);\n  } else {\n    return [{ json: { error: 'No JSON found', raw: text.substring(0, 500) } }];\n  }\n} catch(e) {\n  return [{ json: { error: 'JSON parse failed', raw: text.substring(0, 500) } }];\n}\n\nconst items = parsed.itemBreakdown || [];\nconst grossProfit = parsed.grossProfit || (parsed.totalRevenue - parsed.totalSupplyCost);\n\n// Top sellers by revenue\nconst topSellers = [...items]\n  .sort((a, b) => b.revenue - a.revenue)\n  .slice(0, 5)\n  .map(i => ({ name: i.name, qtySold: i.qtySold, revenue: i.revenue, sellThroughPct: i.sellThroughPct }));\n\n// Fast movers: >60% sell-through\nconst fastMovers = items\n  .filter(i => i.sellThroughPct > 60)\n  .map(i => ({ name: i.name, sellThroughPct: i.sellThroughPct, note: 'reorder soon' }));\n\n// Dead stock: <20% sell-through\nconst deadStock = items\n  .filter(i => i.sellThroughPct < 20)\n  .map(i => ({ name: i.name, qtySupplied: i.qtySupplied, qtySold: i.qtySold, sellThroughPct: i.sellThroughPct }));\n\n// Slow movers: 20-40%\nconst slowMovers = items.filter(i => i.sellThroughPct >= 20 && i.sellThroughPct < 40);\n\n// Reorder recommendations with context\nconst reorderRecommendations = [];\nif (fastMovers.length > 0) {\n  fastMovers.forEach(i => {\n    const item = items.find(x => x.name === i.name);\n    const remaining = item.qtySupplied - item.qtySold;\n    reorderRecommendations.push(`${i.name}: ${i.sellThroughPct}% sold through with ${remaining} units remaining. High demand - reorder before stock runs out.`);\n  });\n} else {\n  // Show top 3 best performers even if none hit 60%\n  const best = [...items].sort((a, b) => b.sellThroughPct - a.sellThroughPct).slice(0, 3);\n  best.forEach(i => {\n    const remaining = i.qtySupplied - i.qtySold;\n    reorderRecommendations.push(`${i.name}: Best sell-through at ${i.sellThroughPct}% (${i.qtySold} sold, ${remaining} remaining). Monitor as month progresses.`);\n  });\n}\nif (deadStock.length > 0) {\n  deadStock.forEach(i => {\n    reorderRecommendations.push(`${i.name}: Only ${i.sellThroughPct}% sold (${i.qtySold} of ${i.qtySupplied} units). Consider reducing next order quantity.`);\n  });\n}\n\n// Alerts - actionable only, no redundant margin summary\nconst alerts = [];\nif (deadStock.length > 0) {\n  deadStock.forEach(i => {\n    alerts.push(`Dead stock: ${i.name} - only ${i.qtySold} of ${i.qtySupplied} units sold (${i.sellThroughPct}%). Risk of expiry or waste.`);\n  });\n}\nif (slowMovers.length > 0) {\n  alerts.push(`Slow movers this period: ${slowMovers.map(i => i.name).join(', ')} - all between 20-40% sell-through. Review pricing or placement.`);\n}\nconst zeroSales = items.filter(i => i.qtySold === 0);\nif (zeroSales.length > 0) {\n  alerts.push(`No sales recorded for: ${zeroSales.map(i => i.name).join(', ')}. Verify stock placement and visibility.`);\n}\nif (alerts.length === 0) {\n  alerts.push('All items are selling. No dead stock or zero-sale items detected this period.');\n}\n\nreturn [{\n  json: {\n    analysisMonth: parsed.analysisMonth || '',\n    totalSupplyCost: parsed.totalSupplyCost || 0,\n    totalRevenue: parsed.totalRevenue || 0,\n    grossProfit: grossProfit,\n    profitMarginPct: parsed.profitMarginPct || 0,\n    itemBreakdown: JSON.stringify(items),\n    topSellers: JSON.stringify(topSellers),\n    fastMovers: JSON.stringify(fastMovers),\n    deadStock: JSON.stringify(deadStock),\n    reorderRecommendations: JSON.stringify(reorderRecommendations),\n    alerts: JSON.stringify(alerts)\n  }\n}];"
+      }
+    },
+    {
+      "id": "dd44ee55-ff66-4a77-bb88-cc9900112233",
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        400,
+        1400
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Gmail Email Trigger": {
+      "main": [
+        [
+          {
+            "node": "Route Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyst LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Financial Analyst Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report Writer LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Report Writer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Email": {
+      "main": [
+        [
+          {
+            "node": "Extract Invoice OCR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Sales OCR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Month from Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Unrecognized Email Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Invoice OCR": {
+      "main": [
+        [
+          {
+            "node": "Detect OCR Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect OCR Errors": {
+      "main": [
+        [
+          {
+            "node": "IF - Valid OCR?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Valid OCR?": {
+      "main": [
+        [
+          {
+            "node": "Parse Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error Alert (Invoice)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Invoice to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email (Invoice)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Parser LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parse Invoice",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Parse Invoice",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Parser LLM2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Invoice Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Sales OCR": {
+      "main": [
+        [
+          {
+            "node": "Detect OCR Errors (Sales)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect OCR Errors (Sales)": {
+      "main": [
+        [
+          {
+            "node": "IF - Valid OCR? (Sales)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Valid OCR? (Sales)": {
+      "main": [
+        [
+          {
+            "node": "Parse Sales Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error Alert (Sales)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Sales to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email (Sales)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sales Parser LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parse Sales Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sales Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Parse Sales Report",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sales Parser LLM2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sales Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Month from Email": {
+      "main": [
+        [
+          {
+            "node": "Read Invoices from Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Invoices from Sheets": {
+      "main": [
+        [
+          {
+            "node": "Read Sales from Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sales from Sheets": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Data": {
+      "main": [
+        [
+          {
+            "node": "Financial Analyst Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare PDF Report Input": {
+      "main": [
+        [
+          {
+            "node": "Report Writer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Invoice": {
+      "main": [
+        [
+          {
+            "node": "Extract Invoice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Invoice Data": {
+      "main": [
+        [
+          {
+            "node": "Store Invoice to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Sales Report": {
+      "main": [
+        [
+          {
+            "node": "Extract Sales Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Sales Data": {
+      "main": [
+        [
+          {
+            "node": "Store Sales to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Financial Analyst Agent": {
+      "main": [
+        [
+          {
+            "node": "Extract Analysis Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Analysis Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare PDF Report Input",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Store Analysis to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report Writer Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Monthly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Financial Analyst Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Gmail Email Trigger": {
+      "Gmail Email Trigger": {
+        "lastTimeChecked": 1772059752,
+        "possibleDuplicates": [
+          "19c96fdf80a78f0a"
+        ]
+      }
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "50d90eab-1b20-424b-a90b-931199bd0103",
+  "activeVersionId": "50d90eab-1b20-424b-a90b-931199bd0103",
+  "versionCounter": 97,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-02-08T18:23:41.914Z",
+      "createdAt": "2026-02-08T18:23:41.914Z",
+      "role": "workflow:owner",
+      "workflowId": "3cRQVn046MAGBszj",
+      "projectId": "3ZHf7m42czS42PH1",
+      "project": {
+        "updatedAt": "2025-06-20T23:28:10.402Z",
+        "createdAt": "2025-06-20T23:28:08.032Z",
+        "id": "3ZHf7m42czS42PH1",
+        "name": "Navneet Singh <navinator835@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-06-20T23:28:08.032Z",
+            "createdAt": "2025-06-20T23:28:08.032Z",
+            "userId": "774bd08f-dec9-4f92-8b22-960a132aff95",
+            "projectId": "3ZHf7m42czS42PH1",
+            "user": {
+              "updatedAt": "2026-02-25T22:10:25.182Z",
+              "createdAt": "2025-06-20T23:28:06.498Z",
+              "id": "774bd08f-dec9-4f92-8b22-960a132aff95",
+              "email": "navinator835@gmail.com",
+              "firstName": "Navneet",
+              "lastName": "Singh",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "userClaimedAiCredits": true,
+                "firstSuccessfulWorkflowId": "3cRQVn046MAGBszj",
+                "userActivatedAt": 1772057412618
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2026-02-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-02-25T22:57:07.244Z",
+    "createdAt": "2026-02-25T22:57:07.244Z",
+    "versionId": "50d90eab-1b20-424b-a90b-931199bd0103",
+    "workflowId": "3cRQVn046MAGBszj",
+    "nodes": [
+      {
+        "parameters": {
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "simple": false,
+          "filters": {
+            "q": "subject:invoice OR subject:\"cashier report\" OR subject:\"monthly analysis\"",
+            "readStatus": "unread"
+          },
+          "options": {
+            "dataPropertyAttachmentsPrefixName": "attachment_",
+            "downloadAttachments": true
+          }
+        },
+        "id": "12a34b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c",
+        "name": "Gmail Email Trigger",
+        "type": "n8n-nodes-base.gmailTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -64,
+          688
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "c1qMB82DsFSyyQXc",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Analyze this gas station inventory data for {{ $json.analysisMonth }} and return ONLY a valid JSON object, no other text.\n\nSUPPLY DATA:\n{{ $json.supplyData }}\n\nSALES DATA:\n{{ $json.salesData }}\n\nFor each item, match supply items to sales items by name and calculate metrics. Use the calculator tool for precise math.\n\nReturn ONLY this JSON structure:\n{\"analysisMonth\":\"{{ $json.analysisMonth }}\",\"totalSupplyCost\":{{ $json.totalSupplyCost }},\"totalRevenue\":{{ $json.totalRevenue }},\"grossProfit\":0,\"profitMarginPct\":0,\"itemBreakdown\":[{\"name\":\"\",\"qtySupplied\":0,\"qtySold\":0,\"sellThroughPct\":0,\"revenue\":0,\"cost\":0,\"profit\":0}]}\n\nRules:\n- grossProfit = totalRevenue - totalSupplyCost\n- profitMarginPct = (grossProfit / totalRevenue * 100) rounded to 1 decimal\n- sellThroughPct = (qtySold / qtySupplied * 100) rounded to 1 decimal\n- Include every item from supply data in itemBreakdown\n- Return ONLY the JSON object, no explanation, no markdown",
+          "hasOutputParser": false,
+          "options": {
+            "maxIterations": 5,
+            "systemMessage": "You are a Senior Financial Analyst specializing in gas station inventory management. Always be specific and quantitative in your analysis. Even with limited data, identify the most important patterns and provide actionable insights. Always populate reorderRecommendations and alerts with concrete findings."
+          }
+        },
+        "id": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+        "name": "Financial Analyst Agent",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 1.9,
+        "position": [
+          480,
+          1200
+        ]
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gpt-3.5-turbo",
+            "mode": "list",
+            "cachedResultName": "gpt-3.5-turbo"
+          },
+          "options": {
+            "temperature": 0.1
+          }
+        },
+        "id": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
+        "name": "Analyst LLM",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          400,
+          1408
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "OD2MSrjB2D6fNI12",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Generate a professional, visually appealing HTML report for a gas station inventory analysis.\n\nStation: {{ $json.stationName }}\nMonth: {{ $json.analysisMonth }}\nData Sources: {{ $json.invoiceCount }} invoices, {{ $json.salesReportCount }} sales reports\nTotal Supply Cost: ${{ $json.totalSupplyCost }}\nTotal Revenue: ${{ $json.totalRevenue }}\n\nANALYSIS DATA:\n{{ $json.analysisResults }}\n\nCreate HTML with:\n- Inline CSS styling (no external stylesheets)\n- Professional typography (Arial, sans-serif)\n- A header banner with station name and month\n- Summary cards for key metrics (revenue, profit, margin) with colored backgrounds\n- Data tables with borders, padding, and alternating row colors\n- Color coding: green for positive metrics, red for negative, yellow for warnings\n- Dead stock items highlighted in red\n- Top sellers highlighted in green\n- A recommendations section\n- Footer with generation timestamp\n\nReturn ONLY the complete HTML document, starting with <!DOCTYPE html>.",
+          "options": {
+            "systemMessage": "You are an expert business report designer specializing in creating professional, visually appealing HTML reports with inline CSS. Your reports should look like they were designed by a professional graphic designer. Always return complete, valid HTML documents.",
+            "maxIterations": 5
+          }
+        },
+        "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
+        "name": "Report Writer Agent",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 1.9,
+        "position": [
+          1408,
+          1200
+        ]
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gpt-3.5-turbo",
+            "mode": "list",
+            "cachedResultName": "gpt-3.5-turbo"
+          },
+          "options": {
+            "temperature": 0.4
+          }
+        },
+        "id": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+        "name": "Report Writer LLM",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          1360,
+          1408
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "OD2MSrjB2D6fNI12",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+          "subject": "=Monthly Inventory Analysis - {{ $('Prepare PDF Report Input').item.json.analysisMonth }}",
+          "emailType": "html",
+          "message": "={{ $('Report Writer Agent').item.json.output || $('Report Writer Agent').item.json.text || '' }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "f8a9b0c1-d2e3-4f4a-5b6c-7d8e9f0a1b2c",
+        "name": "Send Monthly Report",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1808,
+          1200
+        ],
+        "webhookId": "904bb507-a68b-4ad3-a10f-eaed24460ba9",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "c1qMB82DsFSyyQXc",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": false,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "a1b2c3d4-1111-4aaa-bbbb-ccccddddeeee",
+                      "operator": {
+                        "type": "string",
+                        "operation": "contains"
+                      },
+                      "leftValue": "={{ $json.subject }}",
+                      "rightValue": "invoice"
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "Invoice"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": false,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "a1b2c3d4-2222-4aaa-bbbb-ccccddddeeee",
+                      "operator": {
+                        "type": "string",
+                        "operation": "contains"
+                      },
+                      "leftValue": "={{ $json.subject }}",
+                      "rightValue": "cashier report"
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "Cashier Report"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": false,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "a1b2c3d4-3333-4aaa-bbbb-ccccddddeeee",
+                      "operator": {
+                        "type": "string",
+                        "operation": "contains"
+                      },
+                      "leftValue": "={{ $json.subject }}",
+                      "rightValue": "monthly analysis"
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "Monthly Analysis"
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra"
+          }
+        },
+        "id": "2a9d32c5-66a2-4d6d-a3b9-7de8d5887f65",
+        "name": "Route Email",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          112,
+          656
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+          "subject": "Email Subject Not Recognized - Gas Station System",
+          "emailType": "text",
+          "message": "=Your email could not be processed because the subject line did not match any expected patterns.\n\nYour subject: {{ $json.subject }}\n\nPlease use one of these subject formats:\n- Invoice - [Vendor] - [Date]\n- Cashier Report - [Date]\n- Monthly Analysis - [Month] [Year]",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "fdf410fb-df54-478c-bd22-02ef23a60ae0",
+        "name": "Send Unrecognized Email Error",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          608,
+          1408
+        ],
+        "webhookId": "45109524-759f-4efc-af45-03b7ffa31f3a",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "c1qMB82DsFSyyQXc",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "pdf",
+          "binaryPropertyName": "attachment_0",
+          "options": {}
+        },
+        "id": "d1a2b3c4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+        "name": "Extract Invoice OCR",
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1.1,
+        "position": [
+          368,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const text = $input.first().json.text || '';\n\nconst wordCount = text.split(/\\s+/).filter(w => w.length > 0).length;\nconst hasNumbers = /\\d/.test(text);\nconst hasLetters = /[a-zA-Z]/.test(text);\nconst specialCharCount = (text.match(/[^a-zA-Z0-9\\s.,;:$#@!?()\\-\\/]/g) || []).length;\nconst specialCharRatio = text.length > 0 ? specialCharCount / text.length : 0;\n\nlet quality = 'high';\nlet errors = [];\n\nif (wordCount < 10) {\n  quality = 'low';\n  errors.push('Too few words extracted (possible scan quality issue)');\n}\n\nif (!hasNumbers || !hasLetters) {\n  quality = 'low';\n  errors.push('Missing expected content (numbers or letters)');\n}\n\nif (specialCharRatio > 0.3) {\n  quality = 'low';\n  errors.push('High special character ratio (OCR artifacts)');\n}\n\nif (quality !== 'low' && !text.toLowerCase().includes('invoice') && !text.toLowerCase().includes('total') && !text.toLowerCase().includes('amount')) {\n  quality = 'medium';\n  errors.push('Expected invoice keywords missing - may not be an invoice document');\n}\n\nreturn [{\n  json: {\n    data: text,\n    ocr_quality: quality,\n    ocr_errors: errors,\n    is_valid: quality !== 'low',\n    word_count: wordCount\n  }\n}];"
+        },
+        "id": "e2f3a4b5-c6d7-4e8f-9a0b-1c2d3e4f5a6b",
+        "name": "Detect OCR Errors",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          544,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.is_valid }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "f3a4b5c6-d7e8-4f9a-0b1c-2d3e4f5a6b7c",
+        "name": "IF - Valid OCR?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          704,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Extract structured invoice data from this OCR text and return ONLY a valid JSON object with no other text.\n\nTEXT:\n{{ $json.data }}\n\nReturn this exact JSON structure:\n{\"vendor\": \"company name\", \"invoice_date\": \"YYYY-MM-DD\", \"month\": \"YYYY-MM\", \"items\": [{\"name\": \"item name\", \"qty\": 0, \"unit_cost\": 0, \"total_cost\": 0}], \"total_cost\": 0}\n\nRules:\n- vendor: the company/vendor name on the invoice\n- invoice_date: date in YYYY-MM-DD format\n- month: YYYY-MM format extracted from invoice_date\n- items: every line item with numeric qty and costs\n- total_cost: total invoice amount as a number\n- Return ONLY the JSON object, no explanation, no markdown",
+          "hasOutputParser": false,
+          "options": {
+            "systemMessage": "You are an expert at extracting structured invoice data from OCR text, including imperfect scans of printed and handwritten invoices. Always return valid JSON.",
+            "maxIterations": 10
+          }
+        },
+        "id": "a1b2c3d4-e5f6-4a7b-8c9d-111111111111",
+        "name": "Parse Invoice",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 1.9,
+        "position": [
+          864,
+          224
+        ]
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gpt-3.5-turbo",
+            "mode": "list",
+            "cachedResultName": "gpt-3.5-turbo"
+          },
+          "options": {
+            "temperature": 0.1
+          }
+        },
+        "id": "b2c3d4e5-f6a7-4b8c-9d0e-222222222222",
+        "name": "Invoice Parser LLM",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          864,
+          400
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "OD2MSrjB2D6fNI12",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "autoFix": true
+        },
+        "id": "c3d4e5f6-a7b8-4c9d-0e1f-333333333333",
+        "name": "Invoice Output Parser",
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.2,
+        "position": [
+          1040,
+          368
+        ]
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gpt-3.5-turbo",
+            "mode": "list",
+            "cachedResultName": "gpt-3.5-turbo"
+          },
+          "options": {}
+        },
+        "id": "d4e5f6a7-b8c9-4d0e-1f2a-444444444444",
+        "name": "Invoice Parser LLM2",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          1104,
+          496
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "OD2MSrjB2D6fNI12",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Invoices"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "e5f6a7b8-c9d0-4e1f-2a3b-555555555555",
+        "name": "Store Invoice to Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          1360,
+          224
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "lKrtgm7vYFwO4YeG",
+            "name": "My Google Sheets"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+          "subject": "=Invoice Processed Successfully",
+          "emailType": "text",
+          "message": "=Your invoice has been processed and stored successfully.\n\nVendor: {{ $('Extract Invoice Data').item.json.vendor }}\nMonth: {{ $('Extract Invoice Data').item.json.month }}\nTotal: ${{ $('Extract Invoice Data').item.json.total_cost }}\nOCR Quality: {{ $('Detect OCR Errors').item.json.ocr_quality }}\n\nThis data will be included in your monthly analysis report.",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "f6a7b8c9-d0e1-4f2a-3b4c-666666666666",
+        "name": "Send Confirmation Email (Invoice)",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1552,
+          224
+        ],
+        "webhookId": "a3fbb0a7-39d6-4934-953b-4885f82e30ea",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "c1qMB82DsFSyyQXc",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+          "subject": "=Invoice Processing Error - OCR Quality Issue",
+          "emailType": "text",
+          "message": "=Your invoice could not be processed due to OCR quality issues.\n\nIssues: {{ $json.ocr_errors }}\nWords extracted: {{ $json.word_count }}\n\nPlease resend with a clearer scan.",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "a7b8c9d0-e1f2-4a3b-4c5d-777777777777",
+        "name": "Send Error Alert (Invoice)",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          864,
+          544
+        ],
+        "webhookId": "550bf1a5-82c1-4c12-b0f0-4339e389159d",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "c1qMB82DsFSyyQXc",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "pdf",
+          "binaryPropertyName": "attachment_0",
+          "options": {}
+        },
+        "id": "50a10726-438a-4ccc-b659-dd51dde0c346",
+        "name": "Extract Sales OCR",
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          800
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const text = $input.first().json.text || '';\n\nconst wordCount = text.split(/\\s+/).filter(w => w.length > 0).length;\nconst hasNumbers = /\\d/.test(text);\nconst hasLetters = /[a-zA-Z]/.test(text);\nconst specialCharCount = (text.match(/[^a-zA-Z0-9\\s.,;:$#@!?()\\-\\/]/g) || []).length;\nconst specialCharRatio = text.length > 0 ? specialCharCount / text.length : 0;\n\nlet quality = 'high';\nlet errors = [];\n\nif (wordCount < 10) {\n  quality = 'low';\n  errors.push('Too few words extracted (possible scan quality issue)');\n}\n\nif (!hasNumbers || !hasLetters) {\n  quality = 'low';\n  errors.push('Missing expected content (numbers or letters)');\n}\n\nif (specialCharRatio > 0.3) {\n  quality = 'low';\n  errors.push('High special character ratio (OCR artifacts)');\n}\n\nif (quality !== 'low' && !text.toLowerCase().includes('sales') && !text.toLowerCase().includes('revenue') && !text.toLowerCase().includes('register') && !text.toLowerCase().includes('total')) {\n  quality = 'medium';\n  errors.push('Expected sales report keywords missing');\n}\n\nreturn [{\n  json: {\n    data: text,\n    ocr_quality: quality,\n    ocr_errors: errors,\n    is_valid: quality !== 'low',\n    word_count: wordCount\n  }\n}];"
+        },
+        "id": "7c5e9d32-066d-477b-90e9-da9693926a55",
+        "name": "Detect OCR Errors (Sales)",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          608,
+          800
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "b1b2c3d4-4444-4aaa-bbbb-ccccddddeeee",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.is_valid }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "a051cce9-7db4-46c7-a149-e9ef50a64395",
+        "name": "IF - Valid OCR? (Sales)",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          800,
+          800
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Extract structured sales data from this cashier report OCR text and return ONLY a valid JSON object with no other text.\n\nTEXT:\n{{ $json.data }}\n\nReturn this exact JSON structure:\n{\"report_date\": \"YYYY-MM-DD\", \"month\": \"YYYY-MM\", \"items\": [{\"name\": \"item name\", \"qty\": 0, \"unit_price\": 0, \"total_revenue\": 0}], \"total_revenue\": 0}\n\nRules:\n- report_date: date of the report in YYYY-MM-DD format\n- month: YYYY-MM format extracted from report_date\n- items: every line item sold with numeric qty and prices\n- total_revenue: total sales amount as a number\n- Return ONLY the JSON object, no explanation, no markdown",
+          "hasOutputParser": false,
+          "options": {
+            "systemMessage": "You are an expert at extracting structured sales data from cash register reports, including imperfect OCR text from printed and handwritten documents. Always return valid JSON.",
+            "maxIterations": 10
+          }
+        },
+        "id": "08d7f8b1-0fea-41a1-963c-8d372ff70b11",
+        "name": "Parse Sales Report",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 1.9,
+        "position": [
+          1008,
+          704
+        ]
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gpt-3.5-turbo",
+            "mode": "list",
+            "cachedResultName": "gpt-3.5-turbo"
+          },
+          "options": {
+            "temperature": 0.1
+          }
+        },
+        "id": "9614733a-8a82-4ee5-811e-803589fe7d4a",
+        "name": "Sales Parser LLM",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          928,
+          912
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "OD2MSrjB2D6fNI12",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "autoFix": true
+        },
+        "id": "549af240-39d8-4b1c-8223-ec08f9203dfc",
+        "name": "Sales Output Parser",
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.2,
+        "position": [
+          1088,
+          912
+        ]
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gpt-3.5-turbo",
+            "mode": "list",
+            "cachedResultName": "gpt-3.5-turbo"
+          },
+          "options": {}
+        },
+        "id": "c32461e8-c2f1-4981-9fd9-5671fce60b48",
+        "name": "Sales Parser LLM2",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          1088,
+          1040
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "OD2MSrjB2D6fNI12",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Sales"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "cd2ca54e-2ea5-4bbf-8003-8d1e7a99a6a2",
+        "name": "Store Sales to Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          1200,
+          704
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "lKrtgm7vYFwO4YeG",
+            "name": "My Google Sheets"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+          "subject": "=Sales Report Processed Successfully",
+          "emailType": "text",
+          "message": "=Your cashier report has been processed and stored successfully.\n\nDate: {{ $('Extract Sales Data').item.json.report_date }}\nMonth: {{ $('Extract Sales Data').item.json.month }}\nTotal Revenue: ${{ $('Extract Sales Data').item.json.total_revenue }}\nOCR Quality: {{ $('Detect OCR Errors (Sales)').item.json.ocr_quality }}\n\nThis data will be included in your monthly analysis report.",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "9710de36-3c9c-48c4-83ae-93cd92f6ba2a",
+        "name": "Send Confirmation Email (Sales)",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1408,
+          704
+        ],
+        "webhookId": "6e858af7-8328-4147-90be-32ca261be525",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "c1qMB82DsFSyyQXc",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('Gmail Email Trigger').item.json.from.value[0].address }}",
+          "subject": "=Sales Report Processing Error - OCR Quality Issue",
+          "emailType": "text",
+          "message": "=Your cashier report could not be processed due to OCR quality issues.\n\nIssues detected: {{ $json.ocr_errors }}\nWords extracted: {{ $json.word_count }}\n\nPlease resend with a clearer scan or photo.",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "51fc9650-7955-4d71-b480-b642ab4c44b3",
+        "name": "Send Error Alert (Sales)",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1008,
+          1104
+        ],
+        "webhookId": "66216729-b68b-4c1a-9816-407fabad73ad",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "c1qMB82DsFSyyQXc",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const subject = $input.first().json.subject || '';\n\nconst monthNames = ['january', 'february', 'march', 'april', 'may', 'june',\n                    'july', 'august', 'september', 'october', 'november', 'december'];\n\nlet month = null;\nlet year = new Date().getFullYear();\n\nconst yearMatch = subject.match(/\\b(20\\d{2})\\b/);\nif (yearMatch) year = parseInt(yearMatch[1]);\n\nconst subjectLower = subject.toLowerCase();\nfor (let i = 0; i < monthNames.length; i++) {\n  if (subjectLower.includes(monthNames[i])) {\n    month = String(i + 1).padStart(2, '0');\n    break;\n  }\n}\n\nif (!month) {\n  const lastMonth = new Date();\n  lastMonth.setMonth(lastMonth.getMonth() - 1);\n  month = String(lastMonth.getMonth() + 1).padStart(2, '0');\n  year = lastMonth.getFullYear();\n}\n\nconst analysisMonth = `${year}-${month}`;\n\nreturn [{\n  json: {\n    analysisMonth,\n    requestedBy: $input.first().json.from.value[0].address\n  }\n}];"
+        },
+        "id": "4f2e3f65-fb70-452d-9eab-c97d69b5e179",
+        "name": "Extract Month from Email",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          400,
+          1200
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Invoices"
+          },
+          "options": {}
+        },
+        "id": "34ceac12-51ad-4732-ad45-c70e8acede38",
+        "name": "Read Invoices from Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          608,
+          1200
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "lKrtgm7vYFwO4YeG",
+            "name": "My Google Sheets"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Sales"
+          },
+          "options": {}
+        },
+        "id": "b7158276-8944-4fe3-b591-d542fe582688",
+        "name": "Read Sales from Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          800,
+          1200
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "lKrtgm7vYFwO4YeG",
+            "name": "My Google Sheets"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const invoices = $('Read Invoices from Sheets').all();\nconst sales = $('Read Sales from Sheets').all();\nconst month = $('Extract Month from Email').item.json.analysisMonth;\n\nlet totalSupplyCost = 0;\nconst allSupplyItems = [];\n\ninvoices.forEach(inv => {\n  if (inv.json.month === month) {\n    totalSupplyCost += parseFloat(inv.json.total_cost || 0);\n    try {\n      const items = JSON.parse(inv.json.items || '[]');\n      allSupplyItems.push(...items);\n    } catch(e) {}\n  }\n});\n\nlet totalRevenue = 0;\nconst allSalesItems = [];\n\nsales.forEach(sale => {\n  if (sale.json.month === month) {\n    totalRevenue += parseFloat(sale.json.total_revenue || 0);\n    try {\n      const items = JSON.parse(sale.json.items || '[]');\n      allSalesItems.push(...items);\n    } catch(e) {}\n  }\n});\n\nconst supplyMap = {};\nallSupplyItems.forEach(item => {\n  const key = (item.name || '').toLowerCase().trim();\n  if (!key) return;\n  if (!supplyMap[key]) supplyMap[key] = {name: item.name, qty: 0, totalCost: 0};\n  supplyMap[key].qty += (item.qty || 0);\n  supplyMap[key].totalCost += (item.total_cost || 0);\n});\n\nconst salesMap = {};\nallSalesItems.forEach(item => {\n  const key = (item.name || '').toLowerCase().trim();\n  if (!key) return;\n  if (!salesMap[key]) salesMap[key] = {name: item.name, qty: 0, totalRevenue: 0};\n  salesMap[key].qty += (item.qty || 0);\n  salesMap[key].totalRevenue += (item.total_revenue || 0);\n});\n\nreturn [{\n  json: {\n    analysisMonth: month,\n    invoiceCount: invoices.filter(i => i.json.month === month).length,\n    salesReportCount: sales.filter(s => s.json.month === month).length,\n    supplyData: JSON.stringify(Object.values(supplyMap)),\n    salesData: JSON.stringify(Object.values(salesMap)),\n    totalSupplyCost,\n    totalRevenue\n  }\n}];"
+        },
+        "id": "d24b428f-2375-453f-be42-61f9dd54f77e",
+        "name": "Aggregate Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1008,
+          1200
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const analysis = $input.first().json;\nconst aggData = $('Aggregate Data').item.json;\n\nconst month = analysis.analysisMonth || aggData.analysisMonth;\nconst [year, monthNum] = month.split('-');\nconst monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst displayMonth = `${monthNames[parseInt(monthNum)-1]} ${year}`;\n\n// Parse JSON strings back to arrays for the Report Writer\nconst itemBreakdown = JSON.parse(analysis.itemBreakdown || '[]');\nconst topSellers = JSON.parse(analysis.topSellers || '[]');\nconst fastMovers = JSON.parse(analysis.fastMovers || '[]');\nconst deadStock = JSON.parse(analysis.deadStock || '[]');\nconst reorderRecommendations = JSON.parse(analysis.reorderRecommendations || '[]');\nconst alerts = JSON.parse(analysis.alerts || '[]');\n\nreturn [{\n  json: {\n    stationName: 'Gas Station',\n    analysisMonth: displayMonth,\n    invoiceCount: aggData.invoiceCount,\n    salesReportCount: aggData.salesReportCount,\n    totalSupplyCost: analysis.totalSupplyCost,\n    totalRevenue: analysis.totalRevenue,\n    grossProfit: analysis.grossProfit,\n    profitMarginPct: analysis.profitMarginPct,\n    itemBreakdown: itemBreakdown,\n    topSellers: topSellers,\n    fastMovers: fastMovers,\n    deadStock: deadStock,\n    reorderRecommendations: reorderRecommendations,\n    alerts: alerts\n  }\n}];"
+        },
+        "id": "a1b2c3d4-e5f6-4a7b-8c9d-aabbccddeeff",
+        "name": "Prepare PDF Report Input",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          1200
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1mbEsj2kduRdYp6kbpncvDTiQojvJprBjR-EVvRqdgB4"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Monthly_Analysis"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "b2c3d4e5-f6a7-4b8c-9d0e-ffeeddccbbaa",
+        "name": "Store Analysis to Sheets",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          1600,
+          1200
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "lKrtgm7vYFwO4YeG",
+            "name": "My Google Sheets"
+          }
+        }
+      },
+      {
+        "id": "aa11bb22-cc33-4d44-ee55-ff6677889900",
+        "name": "Extract Invoice Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const text = $input.first().json.output || '';\ntry {\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    const parsed = JSON.parse(jsonMatch[0]);\n    return [{\n      json: {\n        vendor: parsed.vendor || '',\n        invoice_date: parsed.invoice_date || '',\n        month: parsed.month || '',\n        items: JSON.stringify(parsed.items || []),\n        total_cost: parsed.total_cost || 0\n      }\n    }];\n  }\n} catch(e) {}\nreturn [{ json: { error: 'Could not parse invoice JSON', raw: text.substring(0, 500) } }];"
+        }
+      },
+      {
+        "id": "bb22cc33-dd44-4e55-ff66-aa7788990011",
+        "name": "Extract Sales Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          700
+        ],
+        "parameters": {
+          "jsCode": "const text = $input.first().json.output || '';\ntry {\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    const parsed = JSON.parse(jsonMatch[0]);\n    return [{\n      json: {\n        report_date: parsed.report_date || '',\n        month: parsed.month || '',\n        items: JSON.stringify(parsed.items || []),\n        total_revenue: parsed.total_revenue || 0\n      }\n    }];\n  }\n} catch(e) {}\nreturn [{ json: { error: 'Could not parse sales JSON', raw: text.substring(0, 500) } }];"
+        }
+      },
+      {
+        "id": "cc33dd44-ee55-4f66-aa77-bb8899001122",
+        "name": "Extract Analysis Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          700,
+          1200
+        ],
+        "parameters": {
+          "jsCode": "const text = $input.first().json.output || '';\nlet parsed;\ntry {\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    parsed = JSON.parse(jsonMatch[0]);\n  } else {\n    return [{ json: { error: 'No JSON found', raw: text.substring(0, 500) } }];\n  }\n} catch(e) {\n  return [{ json: { error: 'JSON parse failed', raw: text.substring(0, 500) } }];\n}\n\nconst items = parsed.itemBreakdown || [];\nconst grossProfit = parsed.grossProfit || (parsed.totalRevenue - parsed.totalSupplyCost);\n\n// Top sellers by revenue\nconst topSellers = [...items]\n  .sort((a, b) => b.revenue - a.revenue)\n  .slice(0, 5)\n  .map(i => ({ name: i.name, qtySold: i.qtySold, revenue: i.revenue, sellThroughPct: i.sellThroughPct }));\n\n// Fast movers: >60% sell-through\nconst fastMovers = items\n  .filter(i => i.sellThroughPct > 60)\n  .map(i => ({ name: i.name, sellThroughPct: i.sellThroughPct, note: 'reorder soon' }));\n\n// Dead stock: <20% sell-through\nconst deadStock = items\n  .filter(i => i.sellThroughPct < 20)\n  .map(i => ({ name: i.name, qtySupplied: i.qtySupplied, qtySold: i.qtySold, sellThroughPct: i.sellThroughPct }));\n\n// Slow movers: 20-40%\nconst slowMovers = items.filter(i => i.sellThroughPct >= 20 && i.sellThroughPct < 40);\n\n// Reorder recommendations with context\nconst reorderRecommendations = [];\nif (fastMovers.length > 0) {\n  fastMovers.forEach(i => {\n    const item = items.find(x => x.name === i.name);\n    const remaining = item.qtySupplied - item.qtySold;\n    reorderRecommendations.push(`${i.name}: ${i.sellThroughPct}% sold through with ${remaining} units remaining. High demand - reorder before stock runs out.`);\n  });\n} else {\n  // Show top 3 best performers even if none hit 60%\n  const best = [...items].sort((a, b) => b.sellThroughPct - a.sellThroughPct).slice(0, 3);\n  best.forEach(i => {\n    const remaining = i.qtySupplied - i.qtySold;\n    reorderRecommendations.push(`${i.name}: Best sell-through at ${i.sellThroughPct}% (${i.qtySold} sold, ${remaining} remaining). Monitor as month progresses.`);\n  });\n}\nif (deadStock.length > 0) {\n  deadStock.forEach(i => {\n    reorderRecommendations.push(`${i.name}: Only ${i.sellThroughPct}% sold (${i.qtySold} of ${i.qtySupplied} units). Consider reducing next order quantity.`);\n  });\n}\n\n// Alerts - actionable only, no redundant margin summary\nconst alerts = [];\nif (deadStock.length > 0) {\n  deadStock.forEach(i => {\n    alerts.push(`Dead stock: ${i.name} - only ${i.qtySold} of ${i.qtySupplied} units sold (${i.sellThroughPct}%). Risk of expiry or waste.`);\n  });\n}\nif (slowMovers.length > 0) {\n  alerts.push(`Slow movers this period: ${slowMovers.map(i => i.name).join(', ')} - all between 20-40% sell-through. Review pricing or placement.`);\n}\nconst zeroSales = items.filter(i => i.qtySold === 0);\nif (zeroSales.length > 0) {\n  alerts.push(`No sales recorded for: ${zeroSales.map(i => i.name).join(', ')}. Verify stock placement and visibility.`);\n}\nif (alerts.length === 0) {\n  alerts.push('All items are selling. No dead stock or zero-sale items detected this period.');\n}\n\nreturn [{\n  json: {\n    analysisMonth: parsed.analysisMonth || '',\n    totalSupplyCost: parsed.totalSupplyCost || 0,\n    totalRevenue: parsed.totalRevenue || 0,\n    grossProfit: grossProfit,\n    profitMarginPct: parsed.profitMarginPct || 0,\n    itemBreakdown: JSON.stringify(items),\n    topSellers: JSON.stringify(topSellers),\n    fastMovers: JSON.stringify(fastMovers),\n    deadStock: JSON.stringify(deadStock),\n    reorderRecommendations: JSON.stringify(reorderRecommendations),\n    alerts: JSON.stringify(alerts)\n  }\n}];"
+        }
+      },
+      {
+        "id": "dd44ee55-ff66-4a77-bb88-cc9900112233",
+        "name": "Calculator",
+        "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+        "typeVersion": 1,
+        "position": [
+          400,
+          1400
+        ],
+        "parameters": {}
+      }
+    ],
+    "connections": {
+      "Gmail Email Trigger": {
+        "main": [
+          [
+            {
+              "node": "Route Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Analyst LLM": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Financial Analyst Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Report Writer LLM": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Report Writer Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route Email": {
+        "main": [
+          [
+            {
+              "node": "Extract Invoice OCR",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Extract Sales OCR",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Extract Month from Email",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send Unrecognized Email Error",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Invoice OCR": {
+        "main": [
+          [
+            {
+              "node": "Detect OCR Errors",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Detect OCR Errors": {
+        "main": [
+          [
+            {
+              "node": "IF - Valid OCR?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Valid OCR?": {
+        "main": [
+          [
+            {
+              "node": "Parse Invoice",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send Error Alert (Invoice)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Store Invoice to Sheets": {
+        "main": [
+          [
+            {
+              "node": "Send Confirmation Email (Invoice)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Invoice Parser LLM": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Parse Invoice",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Invoice Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Parse Invoice",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Invoice Parser LLM2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Invoice Output Parser",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Sales OCR": {
+        "main": [
+          [
+            {
+              "node": "Detect OCR Errors (Sales)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Detect OCR Errors (Sales)": {
+        "main": [
+          [
+            {
+              "node": "IF - Valid OCR? (Sales)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Valid OCR? (Sales)": {
+        "main": [
+          [
+            {
+              "node": "Parse Sales Report",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send Error Alert (Sales)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Store Sales to Sheets": {
+        "main": [
+          [
+            {
+              "node": "Send Confirmation Email (Sales)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sales Parser LLM": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Parse Sales Report",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sales Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Parse Sales Report",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sales Parser LLM2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Sales Output Parser",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Month from Email": {
+        "main": [
+          [
+            {
+              "node": "Read Invoices from Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Invoices from Sheets": {
+        "main": [
+          [
+            {
+              "node": "Read Sales from Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Sales from Sheets": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Aggregate Data": {
+        "main": [
+          [
+            {
+              "node": "Financial Analyst Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare PDF Report Input": {
+        "main": [
+          [
+            {
+              "node": "Report Writer Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Invoice": {
+        "main": [
+          [
+            {
+              "node": "Extract Invoice Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Invoice Data": {
+        "main": [
+          [
+            {
+              "node": "Store Invoice to Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Sales Report": {
+        "main": [
+          [
+            {
+              "node": "Extract Sales Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Sales Data": {
+        "main": [
+          [
+            {
+              "node": "Store Sales to Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Financial Analyst Agent": {
+        "main": [
+          [
+            {
+              "node": "Extract Analysis Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Analysis Data": {
+        "main": [
+          [
+            {
+              "node": "Prepare PDF Report Input",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Store Analysis to Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Report Writer Agent": {
+        "main": [
+          [
+            {
+              "node": "Send Monthly Report",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calculator": {
+        "ai_tool": [
+          [
+            {
+              "node": "Financial Analyst Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Navneet Singh",
+    "name": null,
+    "description": null
+  }
+}
